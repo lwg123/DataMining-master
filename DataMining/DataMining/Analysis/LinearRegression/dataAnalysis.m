@@ -95,17 +95,17 @@ void analysis(NSMutableArray *data,NSMutableArray *data2){
    // printf("F检验值为 F= %lf\n",F);      //F~(1,12) = 4.75
 
     if (F > 4.75) {
-         printf("所建模型线性关系在0.95的水平下显著成立\n");
+        // printf("所建模型线性关系在0.95的水平下显著成立\n");
     }else{
     
-        printf("所建模型关系不显著\n");
+        //printf("所建模型关系不显著\n");
     }
     
 }
-void function(double x,double y)
+double function(double x,double y)
 {
     double yvalue = a*x + b;
     double error = yvalue-y;
-    printf("观测值与期望值之差：difference value = %f",error);
+    return error;
 }
 @end

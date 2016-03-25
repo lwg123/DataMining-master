@@ -14,5 +14,5 @@ void analysis(NSMutableArray *data,NSMutableArray *data2);
 
 void loadLineData(NSMutableArray *data,NSMutableArray *data2);
 
-void function(double x,double y);
+double function(double x,double y);
 @end

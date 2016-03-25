@@ -10,6 +10,7 @@
 #import "CollectDataManager.h"
 #import "CollectorDef.h"
 #import "dataAnalysis.h"
+#import "DataStorageManager.h"
 
 #import "DMAverageCalculate.h" //test
 @interface ViewController ()<UITableViewDataSource,UITableViewDelegate>
@@ -28,9 +29,6 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
   
-    NSMutableArray *dataX = [[NSMutableArray alloc]init];
-    NSMutableArray *dataY = [[NSMutableArray alloc]init];
-    
     dataArray = [NSMutableArray array];
     
     table = [[UITableView alloc] initWithFrame:CGRectMake(0, 40, self.view.bounds.size.width, self.view.bounds.size.height - 120)];
@@ -52,12 +50,25 @@
         btn.tag = i;
         [self.view addSubview:btn];
     }
-    /*线性归回部分*/
+          
+   
+    /** 线性归回部分 */
+    [self linearAnalysis];
+
+}
+
+- (void)linearAnalysis{
     
+    NSMutableArray *dataX = [[NSMutableArray alloc]init];
+    NSMutableArray *dataY = [[NSMutableArray alloc]init];
+  
     loadLineData(dataX, dataY);
     analysis(dataX,dataY);
-    function(254.7,29.3);
-
+    for (int i=0; i<dataX.count; i++) {
+        double  difference = function([dataX[i] floatValue],[dataY[i] floatValue]);
+       // NSLog(@"观测值与期望值之差为：%f",difference);
+    }
+    
 }
 
 
