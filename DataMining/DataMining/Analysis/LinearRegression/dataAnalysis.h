@@ -10,9 +10,9 @@
 
 @interface dataAnalysis : NSObject
 
-void analysis(NSMutableArray *data,NSMutableArray *data2);
++ (dataAnalysis *)defaultInstance;
+- (void) analysis :(NSMutableArray *)data and:(NSMutableArray *)data2;
 
-void loadLineData(NSMutableArray *data,NSMutableArray *data2);
+- (void) loadData;
 
-double function(double x,double y);
 @end

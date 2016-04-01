@@ -7,24 +7,79 @@
 //
 
 #import "dataAnalysis.h"
+#import "DataStorageManager.h"
+#import "DMTouchTimeModel.h"
+#import "CollectDataManager.h"
 
 @implementation dataAnalysis
 
-void loadLineData(NSMutableArray *data,NSMutableArray *data2) {
-    float x,y;
-    NSString *path = [[NSBundle mainBundle]pathForResource:@"Data" ofType:@"txt"];
-    FILE *file = fopen([path cStringUsingEncoding:NSASCIIStringEncoding], "r");
-    while (!feof(file)) {
-        fscanf(file, "%f %f", &x, &y);
-        [data addObject:@(x)];
-        [data2 addObject:@(y)];
-    }
-    fclose(file);
++ (dataAnalysis *)defaultInstance {
+    static dispatch_once_t token;
+    static dataAnalysis * model = nil;
+    dispatch_once(&token, ^{
+        model = [[dataAnalysis alloc] init];
+    });
+    return model;
 }
 double a,b;
-void analysis(NSMutableArray *data,NSMutableArray *data2){
+NSMutableArray *dataX;
+NSMutableArray *dataY;
+- (void) loadData {
     
-    double x[data.count],  y[data.count];
+    dataX = [[NSMutableArray alloc] init];
+    dataY = [[NSMutableArray alloc] init];
+    NSMutableArray *dataBeginX = [[NSMutableArray alloc] init];
+    NSMutableArray *dataBeginY = [[NSMutableArray alloc] init];
+    NSMutableArray *dataEndX = [[NSMutableArray alloc] init];
+    NSMutableArray *dataEndY = [[NSMutableArray alloc] init];
+    NSMutableArray *data = [[NSMutableArray alloc] init];
+    NSMutableArray *data2 = [[NSMutableArray alloc] init];
+    
+    NSArray * tempArray = [[DataStorageManager shareInstance] getDataType:entitiesType_Touch WithCount:0 dataFrom:dataSrcType_reliableStorage];
+    for (NSDictionary *dict in tempArray) {
+        if ([dict[@"touchType"] isEqual:@1]) {
+            [dataBeginX addObject:dict[@"x"]];
+            [dataBeginY addObject:dict[@"y"]];
+        } else if ([dict[@"touchType"] isEqual:@3]){
+        
+            [dataEndX addObject:dict[@"x"]];
+            [dataEndY addObject:dict[@"y"]];
+        }
+    }
+    
+    for (int i = 0; i< dataBeginX.count; i++) {
+        double X = [dataBeginX[i] floatValue] - [dataEndX[i] floatValue];
+        double Y = [dataBeginY[i] floatValue] - [dataEndY[i] floatValue];
+        double dis = sqrt(X * X + Y * Y);
+        if (dis == 0) {
+            [data2 addObject:@(i)];
+        } else{
+            [data addObject:@(dis)];
+        }
+    }
+   // NSLog(@"%@",data);
+    
+    NSMutableIndexSet *set=[NSMutableIndexSet indexSet];
+    for(NSNumber *temp in data2)
+    {
+        [set addIndex:[temp intValue]];
+    }
+    NSMutableArray *timeArray  = [[DMTouchTimeModel defaultInstance] getTouchTime];
+    [timeArray removeObjectsAtIndexes:set];
+    dataY = data;
+    dataX = timeArray;
+    
+   // NSLog(@"########%@",tempArray);
+
+}
+
+
+- (void) analysis :(NSMutableArray *)data and:(NSMutableArray *)data2{
+    
+    [self loadData];
+    data2 = dataY;
+    data = dataX;
+    double x[data.count],  y[data2.count];
     int i, n = (int)data.count;
     double d1, d2, d3;
     double sumx,sumy,sumxx,sumyy,sumxy,mx,my,mxx,myy,mxy;
@@ -42,7 +97,6 @@ void analysis(NSMutableArray *data,NSMutableArray *data2){
     }
     mx = sumx / n; //x平均值
     my = sumy / n; //y平均值
-   // printf("mx=%f my=%f\n",mx,my);
     
     // 计算x、y平和x*y的平均值
     for(i = 0;i<n;i++){
@@ -55,7 +109,6 @@ void analysis(NSMutableArray *data,NSMutableArray *data2){
     mxx = sumxx / n;
     myy = sumyy / n;
     mxy = sumxy / n;
-   // printf("mxx=%f myy=%f mxy=%f\n",mxx,myy,mxy);
     
     a=(n*sumxy-sumx*sumy)/(n*sumxx-sumx*sumx);
     b=(sumxx*sumy-sumx*sumxy)/(n*sumxx-sumx*sumx);
@@ -82,7 +135,7 @@ void analysis(NSMutableArray *data,NSMutableArray *data2){
         
         sumerrorsquare+= z*z;
         
-       // printf("z[%d] = %lf\n",i,z);
+      //  printf("z[%d] = %lf\n",i,z);
     }
     error=sqrt(sumerrorsquare/(n-1));//总体偏差
    // printf("标准偏差s(y)=%f\n",error);
@@ -101,8 +154,15 @@ void analysis(NSMutableArray *data,NSMutableArray *data2){
         //printf("所建模型关系不显著\n");
     }
     
+    for (int i=0; i<dataX.count; i++) {
+        double difference = [self function:[dataX[i] floatValue] and:[dataY[i] floatValue]];
+        
+        NSLog(@"观测值与期望值之差为：%f",difference);
+    }
+    
 }
-double function(double x,double y)
+
+- (double) function:(double) x and:(double) y
 {
     double yvalue = a*x + b;
     double error = yvalue-y;

@@ -30,7 +30,8 @@
     [super viewDidLoad];
   
     dataArray = [NSMutableArray array];
-    
+    NSMutableArray *dataX = [[NSMutableArray alloc]init];
+    NSMutableArray *dataY = [[NSMutableArray alloc]init];
     table = [[UITableView alloc] initWithFrame:CGRectMake(0, 40, self.view.bounds.size.width, self.view.bounds.size.height - 120)];
     table.delegate = self;
     table.dataSource = self;
@@ -50,26 +51,11 @@
         btn.tag = i;
         [self.view addSubview:btn];
     }
-          
    
     /** 线性归回部分 */
-    [self linearAnalysis];
-
+    [[dataAnalysis defaultInstance] analysis:dataX and :dataY];
 }
 
-- (void)linearAnalysis{
-    
-    NSMutableArray *dataX = [[NSMutableArray alloc]init];
-    NSMutableArray *dataY = [[NSMutableArray alloc]init];
-  
-    loadLineData(dataX, dataY);
-    analysis(dataX,dataY);
-    for (int i=0; i<dataX.count; i++) {
-        double  difference = function([dataX[i] floatValue],[dataY[i] floatValue]);
-       // NSLog(@"观测值与期望值之差为：%f",difference);
-    }
-    
-}
 
 
 #pragma mark - btn action
