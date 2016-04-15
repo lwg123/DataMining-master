@@ -57,7 +57,6 @@ NSMutableArray *dataY;
             [data addObject:@(dis)];
         }
     }
-   // NSLog(@"%@",data);
     
     NSMutableIndexSet *set=[NSMutableIndexSet indexSet];
     for(NSNumber *temp in data2)
@@ -157,7 +156,7 @@ NSMutableArray *dataY;
     for (int i=0; i<dataX.count; i++) {
         double difference = [self function:[dataX[i] floatValue] and:[dataY[i] floatValue]];
         
-        NSLog(@"观测值与期望值之差为：%f",difference);
+       // NSLog(@"观测值与期望值之差为：%f",difference);
     }
     
 }
